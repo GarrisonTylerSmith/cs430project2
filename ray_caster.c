@@ -5,48 +5,6 @@
 #include "Imagebuffer.c"
 #include "Parsingjson.c"
 
-# define T_SPHERE 1
-# define T_PLANE 2
-# define T_CYLINDER 3
-# define T_CAMERA 4
-typedef struct{
-	int kind; // 0 = cylinder, 1 = sphere, 2 = plane
-	double color[3];
-	double a;
-	double b;
-	double c;
-	double d;
-	union{
-		struct {
-			double center[3];
-			double radius;
-			double height;
-		}cylinder;
-		struct{
-			double center[3];
-			double radius;
-		}sphere;
-		struct{
-			double position;
-			double normal;
-		}plane;
-		struct{
-			double position;
-			double width;
-			double height;
-		}camera;
-	};
-}Object;
-typedef struct{
-	int num_objects;
-	Object objects[128];
-	double camera_width;
-	double camera_height;
-	double camera_position[3];
-	double camera_facing[3];
-	double background_color[3];
-}Scene;
-
 static inline double sqr(double v){
 	return v*v;
 }
@@ -253,7 +211,7 @@ int main(int argc, char** argv){
 	fileinfo.height = atoi(argv[2]);
 	fileinfo.max = 255;
 	fileinfo.type = 6;
-	
+
 	Scene scene;
 	scene = read_scene(argv[3]); 
 	// Scene scene = read_scene(argv[3]);
