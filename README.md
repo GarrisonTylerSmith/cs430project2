@@ -1,0 +1,2 @@
+## CS430 Project 2
+This project is to help us create a raycster . We will have to write a json file and parse a json file and then also have a basic raycaster with a camera, sphere, and a plane. This allows us to get one step closer to a raytracer. 
