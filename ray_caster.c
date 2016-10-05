@@ -105,8 +105,8 @@ double ray_sphere_intersection(double* c, double r, double* Ro, double* Rd){
 
 
 }
-void raycast(Scene scene, char* outfile, PPMmeta fileinfo){
-	PPMImage* data = malloc(sizeof(PPMImage) * fileinfo.width * fileinfo.height);
+void raycast(Scene scene, char* outfile, PPMImage fileinfo){
+	PPMImage *data = malloc(sizeof(PPMImage) * fileinfo.width * fileinfo.height);
 	
 	// raycasting here
 	
@@ -174,7 +174,7 @@ void raycast(Scene scene, char* outfile, PPMmeta fileinfo){
 			
 			// write to Pixel* data
 			
-			PPMImage pixel = data[i * N + j];
+			PPMImage pixel = data[N,M];
 			if(best_t < INFINITY && closest.kind >= 0)
 			{
 				// makes the colors for the obejcts 
@@ -196,25 +196,22 @@ void raycast(Scene scene, char* outfile, PPMmeta fileinfo){
 		
 	}
 	
-	writePPM( outfile, data, fileinfo);
+	writePPM(outfile, data, fileinfo);
 }
 
 // create my own raycasting fucntion
 int main(int argc, char** argv){
-// this is all hard code, use the parsing file for json and raycaster function
 	if(argc < 5){
 		fprintf(stderr, "Usage: width height inout.json output.ppm\n");
 		exit(1);
 	}
-	PPMmeta fileinfo;
+	PPMImage fileinfo;
 	fileinfo.width = atoi(argv[1]);
 	fileinfo.height = atoi(argv[2]);
 	fileinfo.max = 255;
 	fileinfo.type = 6;
 
-	Scene scene;
-	scene = read_scene(argv[3]); 
-	// Scene scene = read_scene(argv[3]);
+	Scene scene = read_scene(argv[3]); 
 
 
 	printf("Read in %d objects\n", scene.num_objects);

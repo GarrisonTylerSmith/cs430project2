@@ -3,14 +3,15 @@
 
 typedef struct {
 	unsigned char red,green,blue;
-}
-PPMPixel;
-typedef struct{
+}PPMPixel;
+typedef struct {
 	unsigned char red,green,blue;
-	int x, y;
+	int width;
+	int height;
+	int max;
+	int type;
 	PPMPixel *data;
-}
-PPMImage;
+}PPMImage;
 typedef struct{
 	int width;
 	int height;
@@ -61,7 +62,7 @@ static PPMImage *readPPM(const char *filename){
 	}
 	ungetc(c,fp);
 	// here we will read the image size and information about it
-	if(fscanf(fp, "%d %d", &img->x, &img->y) != 2){
+	if(fscanf(fp, "%d %d", &img->width, &img->height) != 2){
 		fprintf(stderr, "Invalid image size (error loading '%s')\n", filename);
 		exit(1);
 	}
@@ -77,7 +78,7 @@ static PPMImage *readPPM(const char *filename){
 	}
 	while(fgetc(fp) != '\n');
 	// memory allocation for pixel data
-	img->data = (PPMPixel*)malloc(img->x * img->y * sizeof(PPMPixel));
+	img->data = (PPMPixel*)malloc(img->width * img->height * sizeof(PPMPixel));
 
 	if(!img){
 		fprintf(stderr, "Unable to allocate memory\n" );
@@ -85,17 +86,16 @@ static PPMImage *readPPM(const char *filename){
 	}
 
 	//read pixel data from file
-	if(fread(img->data, 3, img->x * img->y, fp) != img->x * img->y){
+	if(fread(img->data, 3, img->width * img->height, fp) != img->width * img->height){
 		fprintf(stderr, "Error loading image '%s'\n", filename);
 		exit(1);
 	}
 	fclose(fp);
 	return img;
 }
-void writePPM(const char *filename, PPMImage *img, PPMmeta meta){
+void writePPM(const char *filename, PPMImage *img, PPMImage meta){
 	FILE *fp;
-	int type;
-	
+	int type = meta.type;
 	// open file for output
 	fp = fopen(filename, "wb");
 	if(!fp){
@@ -108,7 +108,7 @@ void writePPM(const char *filename, PPMImage *img, PPMmeta meta){
 	// comments
 	fprintf(fp, "# Created by %s\n", CREATOR);
 	// image size
-	fprintf(fp, "%d %d\n", img->x,img->y);
+	fprintf(fp, "%d %d\n", img->width,img->height);
 	// rgb component depth
 	fprintf(fp, "%d", RGB_COMPONENT_COLOR);
 	//fprintf(fp, "%s", img->data);
@@ -116,20 +116,20 @@ void writePPM(const char *filename, PPMImage *img, PPMmeta meta){
 	// pixel data
 	if(type == 3){
 		//fprintf(fp, "%s", img->data);
-		for(int i=0;i<img->x*img->y;i++) {
+		for(int i=0;i<img->width*img->height;i++) {
 			fprintf(fp, "%d\n", img->data[i].red);
 			fprintf(fp, "%d\n", img->data[i].green);
 			fprintf(fp, "%d\n", img->data[i].blue);
 		}
 	}
 	else {
-		fwrite(img->data, 3, img->y * img->x, fp);
+		fwrite(img->data, 3, img->height * img->width, fp);
 	}
 	fclose(fp);
 }
 void changeColorPPM(PPMImage *img){
 	if(img){
-		for(int i=0;i<img->x*img->y;i++){
+		for(int i=0;i<img->width*img->height;i++){
 			img->data[i].red=RGB_COMPONENT_COLOR-img->data[i].red;
 			img->data[i].green=RGB_COMPONENT_COLOR-img->data[i].green;
 			img->data[i].blue=RGB_COMPONENT_COLOR-img->data[i].blue;
@@ -146,6 +146,6 @@ void changeColorPPM(PPMImage *img){
 //  	PPMImage *image;
 // 	image = readPPM(input);
 //  	//changeColorPPM(image);
-//  	writePPM(output, image, atoi(target));
+//  	writePPM(output, image, target);
 //  	return 0;
 //  }
