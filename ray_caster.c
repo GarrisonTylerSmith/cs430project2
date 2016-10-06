@@ -5,24 +5,24 @@
 #include "Imagebuffer.c"
 #include "Parsingjson.c"
 
-static inline double sqr(double v){
+static inline float sqr(float v){
 	return v*v;
 }
-static inline void normalize(double* v){
-	double len = sqrt(sqr(v[0]) + sqr(v[1]) + sqr(v[2]));
+static inline void normalize(float* v){
+	float len = sqrt(sqr(v[0]) + sqr(v[1]) + sqr(v[2]));
 	v[0] /= len;
 	v[1] /= len;
 	v[2] /= len;
 }
-double dot(double v[], double u[], int n){
-	double result = 0;
+float dot(float v[], float u[], int n){
+	float result = 0;
 	for(int i=0; i < n; i++){
 		result += v[i]*u[i];
 	}
 	return result;
 }
 
-double cylinder_intersecion(double* Ro, double* Rd, double* c, double r){
+float cylinder_intersecion(float* Ro, float* Rd, float* c, float r){
 	// Step 1 . Find the equation for the object 
 	// we are interested in (this case a cylinder)
 	// this is essential for the camera view point
@@ -46,24 +46,24 @@ double cylinder_intersecion(double* Ro, double* Rd, double* c, double r){
 	// Rox^2 - 2*Rox*cx + cx^2 + Roz^2 - 2* Roz* Cz + Cz^2 - r^2 = 0
 	// Use quadratic equation to solvew for t..
 	//
-	double a = (sqr(Rd[0]) + sqr(Rd[2]));
-	double b = (2 * (Ro[0] * Rd[0] - Rd[0] * c[0] + Ro[2] * Rd[2] - Rd[2] * c[2]));
-	double d = (sqr(Ro[0]) - 2*Ro[0]*c[0] + sqr(c[0]) + sqr(Ro[2]) - 2* Ro[2]*c[2] + sqr(c[2]) - sqr(r));
-	double det = sqr(b) - 4*a*d; 
+	float a = (sqr(Rd[0]) + sqr(Rd[2]));
+	float b = (2 * (Ro[0] * Rd[0] - Rd[0] * c[0] + Ro[2] * Rd[2] - Rd[2] * c[2]));
+	float d = (sqr(Ro[0]) - 2*Ro[0]*c[0] + sqr(c[0]) + sqr(Ro[2]) - 2* Ro[2]*c[2] + sqr(c[2]) - sqr(r));
+	float det = sqr(b) - 4*a*d; 
 	if( det < 0 ) return -1;
 
 	det = sqrt(det);
 
-	double t0 = (-b - det) / (2*a);
+	float t0 = (-b - det) / (2*a);
 	if (t0 > 0 ) return t0;
 
-	double t1 = (-b + det) / (2*a);
+	float t1 = (-b + det) / (2*a);
 	if(t1 > 0) return t1;
 
 	return -1;
 
 }
-double ray_plane_intersection(double a, double b, double c, double d, double* r0, double* rd){
+float ray_plane_intersection(float a, float b, float c, float d, float* r0, float* rd){
 	return (a*r0[0] + b*r0[1] + c*r0[2] + d) / (a*rd[0] + b*rd[1] + c*rd[2]);
 	//Ray: R(t) = Ro + Rd*t
 	//Plane: ax + by + cz + d = 0
@@ -73,12 +73,12 @@ double ray_plane_intersection(double a, double b, double c, double d, double* r0
 	// do subsituting we get 
 	// t = -(n*Ro + d)/ (n * Rd) 
 
-	// double a = -(n*Ro + d)
-	// double b = (n*Rd)
-	// double det = (a/b)
+	// float a = -(n*Ro + d)
+	// float b = (n*Rd)
+	// float det = (a/b)
 	// if(det < 0) return -1;
 }
-double ray_sphere_intersection(double* c, double r, double* Ro, double* Rd){
+float ray_sphere_intersection(float* c, float r, float* Ro, float* Rd){
 	// Ray: P = Ro + Rd*t
 	// Sphere: (x-xc)^2 + (y-yc)^2 + (z-zc)^2 - r^2 = 0
 	// Subsituting R(t) into sphere equation
@@ -86,18 +86,18 @@ double ray_sphere_intersection(double* c, double r, double* Ro, double* Rd){
 	// rearranging we get
 	// At^2 + Bt + C = 0 where we get two solutions
 	// this is a vector from p to c
-	double a = (sqr(Rd[0]) + sqr(Rd[1]) + sqr(Rd[2]));
-	double b = ((2*Rd[0]*(Ro[0]-c[0])) + (2*Rd[1]*(Ro[1]-c[1])) + (2*Rd[2]*(Ro[2]-c[2])));
-	double d = ((sqr(Ro[0]-c[0])+sqr(Ro[1]-c[1])+sqr(Ro[2]-c[2])) - sqr(2));
-	double det = sqr(b) - 4*a*d; 
+	float a = (sqr(Rd[0]) + sqr(Rd[1]) + sqr(Rd[2]));
+	float b = ((2*Rd[0]*(Ro[0]-c[0])) + (2*Rd[1]*(Ro[1]-c[1])) + (2*Rd[2]*(Ro[2]-c[2])));
+	float d = ((sqr(Ro[0]-c[0])+sqr(Ro[1]-c[1])+sqr(Ro[2]-c[2])) - sqr(2));
+	float det = sqr(b) - 4*a*d; 
 	if( det < 0 ) return -1;
 
 	det = sqrt(det);
 
-	double t0 = (-b - det) / (2*a);
+	float t0 = (-b - det) / (2*a);
 	if (t0 > 0 ) return t0;
 
-	double t1 = (-b + det) / (2*a);
+	float t1 = (-b + det) / (2*a);
 	if(t1 > 0) return t1;
 
 	return -1;
@@ -105,104 +105,101 @@ double ray_sphere_intersection(double* c, double r, double* Ro, double* Rd){
 
 
 }
-void raycast(Scene scene, char* outfile, PPMImage fileinfo){
-	PPMImage *data = malloc(sizeof(PPMImage) * fileinfo.width * fileinfo.height);
+void raycast(Scene scene, char* outfile, PPMImage* image){
+	//PPMImage *image = malloc(sizeof(PPMImage));
+	image->data = malloc(sizeof(PPMPixel) * image->width * image->height);
 	
 	// raycasting here
 	
-	int N = fileinfo.width;
-	int M = fileinfo.height;
-	double w = scene.camera_width;
-	double h = scene.camera_height;
+	int N = image->width;
+	printf("N=%d\n", N);
+	int M = image->height;
+	printf("M=%d\n", M);
+	float w = scene.camera_width;
+	float h = scene.camera_height;
 	
-	double pixel_height = h / M;
-	double pixel_width = w / N;
+	float pixel_height = h / M;
+	float pixel_width = w / N;
 	
-	double p_z = 0;
+	float p_z = 0;
 	
-	double c_x = scene.camera_position[0];
-	double c_y = scene.camera_position[1];
-	double c_z = scene.camera_position[2];
+	float c_x = scene.camera_position[0];
+	float c_y = scene.camera_position[1];
+	float c_z = scene.camera_position[2];
 	
-	double r0[3];
+	float r0[3];
 	r0[0] = c_x;
 	r0[1] = c_y;
 	r0[2] = c_z;
 	
-	double rd[3];
+	float rd[3];
 	rd[2] = 1.0;
 	
 	int i;
 	int j;
 	int k;
 	
-	for(i = 0; i < M; i ++)
-	{
+	for(i = 0; i < M; i ++){
 		rd[1] = c_y + h/2.0 - pixel_height * (i + 0.5);
 		
-		for(j = 0; j < N; j ++)
-		{
+		for(j = 0; j < N; j ++){
 			rd[0] = c_x - w/2.0 + pixel_width * (j + 0.5);
 			
-			double best_t = INFINITY;
-			Object closest;
+			float best_t = INFINITY;
+			Object* closest;
 
-			for(k = 0; k < scene.num_objects; k ++)
-			{
-				double t = -1;
+			for(k = 0; k < scene.num_objects; k ++){
+				float t = -1;
 				Object o = scene.objects[k];
 				
-				if(o.kind == T_SPHERE)
-				{
-					double c[3];
+				if(o.kind == T_SPHERE){
+					float c[3];
 					c[0] = o.a;
 					c[1] = o.b;
 					c[2] = o.c;
 					t = ray_sphere_intersection(c, o.d, r0, rd);
-				}
-				else if(o.kind == T_PLANE)
-				{
+				}else if(o.kind == T_PLANE){
 					t = ray_plane_intersection(o.a,o.b,o.c,o.d,r0,rd);
 				}
 				
-				if(t > 0 && t < best_t)
-				{
+				if(t > 0 && t < best_t){
 					best_t = t;
-					closest = o;
+					closest = &o;
 				}
 			}
 			
 			// write to Pixel* data
 			
-			PPMImage pixel = data[N,M];
-			if(best_t < INFINITY && closest.kind >= 0)
-			{
+//			PPMImage image = data[i * N +j];
+			PPMPixel pixel;
+			if(best_t < INFINITY && closest->kind >= 0){
 				// makes the colors for the obejcts 
-				pixel.red = (char) (closest.color[0] * 255);
-				pixel.green = (char) (closest.color[1] * 255);
-				pixel.blue = (char) (closest.color[2] * 255);
-			}
-			else
-			{
+				pixel.red = (char) (closest->color[0] * 255);
+				pixel.green = (char) (closest->color[1] * 255);
+				pixel.blue = (char) (closest->color[2] * 255);
+				//printf("Found intersection %lf %lf %lf\n", closest.color[0], closest.color[1], closest.color[2]);
+			}else{
 				// creates shadow effect
 				pixel.red = (char) (255* scene.background_color[0]);
 				pixel.green = (char) (255* scene.background_color[1]);
 				pixel.blue = (char) (255* scene.background_color[2]);
 			}
 
-			data[i * N + j] = pixel;
-			
+			image->data[i * N + j].red = pixel.red;
+			image->data[i * N + j].blue = pixel.blue;
+			image->data[i * N + j].green = pixel.green;
+			//printf("pixel %d\n", i*N+j);
 		}
 		
 	}
 	
-	writePPM(outfile, data, fileinfo);
+	writePPM(outfile, image);
 }
 
 // create my own raycasting fucntion
 int main(int argc, char** argv){
 	if(argc < 5){
-		fprintf(stderr, "Usage: width height inout.json output.ppm\n");
+		fprintf(stderr, "Usage: width, height input.json output.ppm\n");
 		exit(1);
 	}
 	PPMImage fileinfo;
@@ -220,7 +217,7 @@ int main(int argc, char** argv){
 	scene.background_color[1] = 0.51;
 	scene.background_color[2] = 0.6;
 
-	raycast(scene,argv[4], fileinfo);
+	raycast(scene, argv[4], &fileinfo);
 
 	return 0;
 }

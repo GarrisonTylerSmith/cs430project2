@@ -4,6 +4,7 @@
 typedef struct {
 	unsigned char red,green,blue;
 }PPMPixel;
+
 typedef struct {
 	unsigned char red,green,blue;
 	int width;
@@ -12,12 +13,12 @@ typedef struct {
 	int type;
 	PPMPixel *data;
 }PPMImage;
-typedef struct{
-	int width;
-	int height;
-	int max;
-	int type;
-}PPMmeta;
+// typedef struct{
+// 	int width;
+// 	int height;
+// 	int max;
+// 	int type;
+// }PPMmeta;
 #define CREATOR "GarrisonSmith"
 #define RGB_COMPONENT_COLOR 255
 
@@ -93,9 +94,9 @@ static PPMImage *readPPM(const char *filename){
 	fclose(fp);
 	return img;
 }
-void writePPM(const char *filename, PPMImage *img, PPMImage meta){
+void writePPM(const char *filename, PPMImage *image){
 	FILE *fp;
-	int type = meta.type;
+	int type = image->type;
 	// open file for output
 	fp = fopen(filename, "wb");
 	if(!fp){
@@ -104,27 +105,27 @@ void writePPM(const char *filename, PPMImage *img, PPMImage meta){
 	}
 	// write the header file
 	// image format
-	fprintf(fp, "P%d\n", type);
+	fprintf(fp, "P3\n");
 	// comments
 	fprintf(fp, "# Created by %s\n", CREATOR);
 	// image size
-	fprintf(fp, "%d %d\n", img->width,img->height);
+	fprintf(fp, "%d %d\n", image->width,image->height);
 	// rgb component depth
-	fprintf(fp, "%d", RGB_COMPONENT_COLOR);
+	fprintf(fp, "%d\n", RGB_COMPONENT_COLOR);
 	//fprintf(fp, "%s", img->data);
 
 	// pixel data
-	if(type == 3){
+	//if(type == 3){
 		//fprintf(fp, "%s", img->data);
-		for(int i=0;i<img->width*img->height;i++) {
-			fprintf(fp, "%d\n", img->data[i].red);
-			fprintf(fp, "%d\n", img->data[i].green);
-			fprintf(fp, "%d\n", img->data[i].blue);
+		for(int i=0;i<image->width*image->height;i++) {
+			fprintf(fp, "%d\n", image->data[i].red);
+			fprintf(fp, "%d\n", image->data[i].green);
+			fprintf(fp, "%d\n", image->data[i].blue);
 		}
-	}
-	else {
-		fwrite(img->data, 3, img->height * img->width, fp);
-	}
+	//}
+	//else {
+//		fwrite(image->data, sizeof(PPMPixel), image->height * image->width, fp);
+	//}
 	fclose(fp);
 }
 void changeColorPPM(PPMImage *img){

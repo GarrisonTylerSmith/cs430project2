@@ -11,40 +11,40 @@
 int line = 1;
 typedef struct{
   int kind; // 0 = cylinder, 1 = sphere, 2 = plane
-  double color[3];
-  double a;
-  double b;
-  double c;
-  double d;
+  float color[3];
+  float a;
+  float b;
+  float c;
+  float d;
   union{
     struct {
-      double center[3];
-      double radius;
-      double height;
+      float center[3];
+      float radius;
+      float height;
     }cylinder;
     struct{
-      double center[3];
-      double radius;
+      float center[3];
+      float radius;
     }sphere;
     struct{
-      double position;
-      double normal;
+      float position;
+      float normal;
     }plane;
     struct{
-      double position;
-      double width;
-      double height;
+      float position;
+      float width;
+      float height;
     }camera;
   };
 }Object;
 typedef struct{
   int num_objects;
   Object objects[128];
-  double camera_width;
-  double camera_height;
-  double camera_position[3];
-  double camera_facing[3];
-  double background_color[3];
+  float camera_width;
+  float camera_height;
+  float camera_position[3];
+  float camera_facing[3];
+  float background_color[3];
 }Scene;
 
 // next_c() wraps the getc() function and provides error checking and line
@@ -116,15 +116,15 @@ char* parse_string(FILE* json) {
   return strdup(buffer);
 }
 // this function checks teh next number in the ray
-double next_number(FILE* json) {
-  double value;
+float next_number(FILE* json) {
+  float value;
   fscanf(json, "%f", &value);
   // Error check this..
   return value;
 }
 // This is the function that checks the next vector of the object
-double* next_vector(FILE* json) {
-  double* v = malloc(3 * sizeof(double));
+float* next_vector(FILE* json) {
+  float* v = malloc(3 * sizeof(float));
   expect_c(json, '[');
   skip_ws(json);
   v[0] = next_number(json);
@@ -259,21 +259,21 @@ Scene read_scene(char* json_name){
           }
         }
         else if(strcmp(key, "color") == 0){
-          double* v3 = next_vector(json);
+          float* v3 = next_vector(json);
           color[0] = v3[0];
           color[1] = v3[1];
           color[2] = v3[2];
           set_color = 1;
         }
         else if(strcmp(key, "position") == 0){
-          double* v3 = next_vector(json);
+          float* v3 = next_vector(json);
           position[0] = v3[0];
           position[1] = v3[1];
           position[2] = v3[2];
           set_position = 1;
         }
         else if(strcmp(key, "normal") == 0){
-          double* v3 = next_vector(json);
+          float* v3 = next_vector(json);
           normal[0] = v3[0];
           normal[1] = v3[1];
           normal[2] = v3[2];
