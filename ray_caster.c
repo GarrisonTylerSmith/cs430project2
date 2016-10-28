@@ -22,7 +22,7 @@ float dot(float v[], float u[], int n){
 	return result;
 }
 
-float cylinder_intersecion(float* Ro, float* Rd, float* c, float r){
+float cylinder_intersecion(float* r0, float* Rd, float* c, float r){
 	// Step 1 . Find the equation for the object 
 	// we are interested in (this case a cylinder)
 	// this is essential for the camera view point
@@ -31,24 +31,24 @@ float cylinder_intersecion(float* Ro, float* Rd, float* c, float r){
 	// (x-Cx)^2 + (z-Cz)^2 = r^2
 	// step 3. Substitute the eq for a ray into our object eq.
 	//
-	//(RoX + RDX*t - Cx)^2 + ( Roz + t*Rdz - Cz)^2 - r^2 = 0
+	//(r0X + RDX*t - Cx)^2 + ( r0z + t*Rdz - Cz)^2 - r^2 = 0
 	//
 	// Step 4. Solve for t .
 	//
 	//Step 4.a Rewrite the equation(flatten).
 	//
-	// -r^2 + t^2 * Rdx^2 + t^2 * Rdz^2 + 2*t * Rox * Rdx - 2*t * Rdx * Cx + 2*t * Roz * Rdz - 2*t * Rdz *cz + Rox^2 - 2*Rox*cx + cx^2 + Roz^2 - 2* Roz* Cz + Cz^2 = 0
+	// -r^2 + t^2 * Rdx^2 + t^2 * Rdz^2 + 2*t * r0x * Rdx - 2*t * Rdx * Cx + 2*t * r0z * Rdz - 2*t * Rdz *cz + r0x^2 - 2*r0x*cx + cx^2 + r0z^2 - 2* r0z* Cz + Cz^2 = 0
 	//
 	// Step 4.b Rewrite the equation in terms of t.
 	//
 	// t^2 * (Rdx^2 + Rdz^2) + 
-	// t* (2 * (Rox * Rdx - Rdx * cx + Roz * Rdz - Rdz * Cz)) + 
-	// Rox^2 - 2*Rox*cx + cx^2 + Roz^2 - 2* Roz* Cz + Cz^2 - r^2 = 0
+	// t* (2 * (r0x * Rdx - Rdx * cx + r0z * Rdz - Rdz * Cz)) + 
+	// r0x^2 - 2*r0x*cx + cx^2 + r0z^2 - 2* r0z* Cz + Cz^2 - r^2 = 0
 	// Use quadratic equation to solvew for t..
 	//
 	float a = (sqr(Rd[0]) + sqr(Rd[2]));
-	float b = (2 * (Ro[0] * Rd[0] - Rd[0] * c[0] + Ro[2] * Rd[2] - Rd[2] * c[2]));
-	float d = (sqr(Ro[0]) - 2*Ro[0]*c[0] + sqr(c[0]) + sqr(Ro[2]) - 2* Ro[2]*c[2] + sqr(c[2]) - sqr(r));
+	float b = (2 * (r0[0] * Rd[0] - Rd[0] * c[0] + r0[2] * Rd[2] - Rd[2] * c[2]));
+	float d = (sqr(r0[0]) - 2*r0[0]*c[0] + sqr(c[0]) + sqr(r0[2]) - 2* r0[2]*c[2] + sqr(c[2]) - sqr(r));
 	float det = sqr(b) - 4*a*d; 
 	if( det < 0 ) return -1;
 
@@ -65,39 +65,39 @@ float cylinder_intersecion(float* Ro, float* Rd, float* c, float r){
 }
 float ray_plane_intersection(float a, float b, float c, float d, float* r0, float* rd){
 	return (a*r0[0] + b*r0[1] + c*r0[2] + d) / (a*rd[0] + b*rd[1] + c*rd[2]);
-	//Ray: R(t) = Ro + Rd*t
+	//Ray: R(t) = r0 + Rd*t
 	//Plane: ax + by + cz + d = 0
 	//solve for t
 	//n is the normal plane
-	// D is the distance from the origin
+	// D is the distance fr0m the origin
 	// do subsituting we get 
-	// t = -(n*Ro + d)/ (n * Rd) 
+	// t = -(n*r0 + d)/ (n * Rd) 
 
-	// float a = -(n*Ro + d)
+	// float a = -(n*r0 + d)
 	// float b = (n*Rd)
 	// float det = (a/b)
 	// if(det < 0) return -1;
 }
-float ray_sphere_intersection(float* c, float r, float* Ro, float* Rd){
-	// Ray: P = Ro + Rd*t
+float ray_sphere_intersection(float* c, float r, float* r0, float* Rd){
+	// Ray: P = r0 + Rd*t
 	// Sphere: (x-xc)^2 + (y-yc)^2 + (z-zc)^2 - r^2 = 0
 	// Subsituting R(t) into sphere equation
 	// (Xo + Xd*t - Xc)^2 + (Yo + Yd*t - Yc)^2 + (Zo + Zd*t - Zc)^2 - r^2 = 0
 	// rearranging we get
 	// At^2 + Bt + C = 0 where we get two solutions
-	// this is a vector from p to c
-	float a = (sqr(Rd[0]) + sqr(Rd[1]) + sqr(Rd[2]));
-	float b = ((2*Rd[0]*(Ro[0]-c[0])) + (2*Rd[1]*(Ro[1]-c[1])) + (2*Rd[2]*(Ro[2]-c[2])));
-	float d = ((sqr(Ro[0]-c[0])+sqr(Ro[1]-c[1])+sqr(Ro[2]-c[2])) - sqr(2));
-	float det = sqr(b) - 4*a*d; 
+	// this is a vector fr0m p to c
+	float A = (sqr(Rd[0]) + sqr(Rd[1]) + sqr(Rd[2]));
+	float B = 2*(Rd[0]*(r0[0]-c[0]) + Rd[1]*(r0[1]-c[1]) + Rd[2]*(r0[2]-c[2]));
+	float C = sqr(r0[0]-c[0])+sqr(r0[1]-c[1])+sqr(r0[2]-c[2]) - sqr(r);
+	float det = sqr(B) - 4*A*C; 
 	if( det < 0 ) return -1;
 
 	det = sqrt(det);
 
-	float t0 = (-b - det) / (2*a);
+	float t0 = (-B - det) / (2*A);
 	if (t0 > 0 ) return t0;
 
-	float t1 = (-b + det) / (2*a);
+	float t1 = (-B + det) / (2*A);
 	if(t1 > 0) return t1;
 
 	return -1;
@@ -105,6 +105,9 @@ float ray_sphere_intersection(float* c, float r, float* Ro, float* Rd){
 
 
 }
+// float* send_ray(float* color, Scene scene, float* r0, float rd){
+
+// }
 void raycast(Scene scene, char* outfile, PPMImage* image){
 	//PPMImage *image = malloc(sizeof(PPMImage));
 	image->data = malloc(sizeof(PPMPixel) * image->width * image->height);
@@ -123,9 +126,9 @@ void raycast(Scene scene, char* outfile, PPMImage* image){
 	
 	float p_z = 0;
 	
-	float c_x = scene.camera_position[0];
-	float c_y = scene.camera_position[1];
-	float c_z = scene.camera_position[2];
+	float c_x = 0;
+	float c_y = 0;
+	float c_z = 0;
 	
 	float r0[3];
 	r0[0] = c_x;
@@ -155,8 +158,11 @@ void raycast(Scene scene, char* outfile, PPMImage* image){
 				if(o.kind == T_SPHERE){
 					float c[3];
 					c[0] = o.a;
+					//printf("%lf\n", c[0]);
 					c[1] = o.b;
+					//printf("%lf\n", c[1]);
 					c[2] = o.c;
+					//printf("%s\n", c[2]);
 					t = ray_sphere_intersection(c, o.d, r0, rd);
 				}else if(o.kind == T_PLANE){
 					t = ray_plane_intersection(o.a,o.b,o.c,o.d,r0,rd);

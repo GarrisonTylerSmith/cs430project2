@@ -7,7 +7,7 @@
 # define T_PLANE 2
 # define T_CYLINDER 3
 # define T_CAMERA 4
-
+# define T_LIGHT 5
 int line = 1;
 typedef struct{
   int kind; // 0 = cylinder, 1 = sphere, 2 = plane
@@ -206,7 +206,9 @@ Scene read_scene(char* json_name){
       objtype = T_SPHERE;
     } else if(strcmp(type_value, "plane") == 0) {
       objtype = T_PLANE;
-    } else {
+    } else if(strcmp(type_value, "light") == 0){
+      objtype = T_LIGHT;
+    }else{
       
       fprintf(stderr, "Unknown type \"%s\" on line %d\n", type_value, line);
       exit(1);
@@ -345,6 +347,24 @@ Scene read_scene(char* json_name){
       new_object.d = radius;
       
     }
+    if(objtype == T_LIGHT){
+      if(set_color != 1){
+        fprintf(stderr, "Object must have a color! Line %d\n", line);
+        exit(1);
+      }
+      if(set_position != 1){
+        fprintf(stderr, "Object must have a position! Line %d\n", line);
+        exit(1);
+      }
+    }
+    // this gets our light properties 
+      new_object.color[0] = color[0];
+      new_object.color[1] = color[1];
+      new_object.color[2] = color[2];
+      
+      new_object.a = position[0];
+      new_object.b = position[1];
+      new_object.c = position[2];
     if(objtype == T_PLANE){
       if(set_color != 1){
         fprintf(stderr, "Object must have a color! Line %d\n", line);
